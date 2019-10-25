@@ -3,7 +3,7 @@
 #include "logic.h"
 #include <SPI.h>
 
-MFRC522 mfrc522_1(8, 7);
+MFRC522 mfrc522_1(7, 6);
 MFRC522 mfrc522_2(10, 9);
 
 byte tags[][4] = {
