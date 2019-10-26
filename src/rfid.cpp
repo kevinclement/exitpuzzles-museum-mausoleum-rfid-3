@@ -3,6 +3,8 @@
 #include "logic.h"
 #include <SPI.h>
 
+#define OFFSET 4
+
 MFRC522 mfrc522_1(7, 6);
 MFRC522 mfrc522_2(10, 9);
 
@@ -38,7 +40,7 @@ void Rfid::handle() {
     RFID_STATE st = checkForTag(i, mfr[i]);
     if (st != state[i]) {
       Serial.print("state changed for ");
-      Serial.print(i + 1);
+      Serial.print(i + OFFSET);
       Serial.print(" ");
       Serial.print(prettyState(state[i]));
       Serial.print(" => ");
