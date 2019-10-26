@@ -8,9 +8,15 @@
 MFRC522 mfrc522_1(7, 6);
 MFRC522 mfrc522_2(10, 9);
 
-byte tags[][4] = {
-  { 0xF7, 0x6F, 0x8C, 0xF2 },
-  { 0x97, 0x6F, 0x8C, 0xF2 }
+byte tags [2][2][4] = {
+  {
+    { 0xF7, 0x6F, 0x8C, 0xF2 },
+    { 0x87, 0x93, 0x8E, 0xF2 }
+  },
+  {
+    { 0x97, 0x6F, 0x8C, 0xF2 },
+    { 0xF7, 0x92, 0x8E, 0xF2 }
+  }
 };
 
 Rfid::Rfid(Logic &logic)
@@ -104,12 +110,18 @@ RFID_STATE Rfid::checkForTag(uint8_t index, MFRC522 *mfr) {
 }
 
 bool Rfid::compareTags(uint8_t index) {
-  for ( uint8_t k = 0; k < 4; k++ ) {
-    if ( readCards[index][k] != tags[index][k] ) {
-       return false;
+  for ( uint8_t i = 0; i < 2; i++ ) {
+    bool cardMatch = true;
+    for ( uint8_t j = 0; j < 4; j++ ) {
+        cardMatch = cardMatch && (readCards[index][j] == tags[index][i][j]);
+    }
+
+    if (cardMatch) {
+      return true;
     }
   }
-  return true;
+
+  return false;
 }
 
 String Rfid::prettyState(uint8_t state) {
