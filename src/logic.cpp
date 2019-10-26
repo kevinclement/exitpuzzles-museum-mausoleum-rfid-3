@@ -3,7 +3,6 @@
 #include "rfid.h"
 #include "version.h"
 
-bool _solved = false;
 Logic::Logic() : 
   rfid(*this)
 {
@@ -15,25 +14,6 @@ void Logic::setup() {
 
 void Logic::handle() {
   rfid.handle();
-
-  if (rfid.solved && !_solved) {
-    if (_unsolvable) {
-      Serial.println("WARN: device was solved, but unsolvable flag is on, so ignoring.");
-    } else {
-      solved();
-    }
-  }
-}
-
-void Logic::solved() {
-  Serial.println("*** ALL IDOLS IN PLACE ***");
-  _solved = true;
-  status();
-}
-
-void Logic::unsolvable() {
-  _unsolvable = !_unsolvable;
-  status();
 }
 
 void Logic::status() {
@@ -44,8 +24,6 @@ void Logic::status() {
       "gitDate:%s,"
       "buildDate:%s,"
 
-      "solved:%s,"
-      "unsolvable:%s,"
       "idol_4:%s,"
       "idol_5:%s"
 
@@ -54,8 +32,6 @@ void Logic::status() {
       GIT_DATE,
       DATE_NOW,
 
-      _solved ? "true" : "false",
-      _unsolvable ? "true" : "false",
       rfid.state[0] == CORRECT ? "true" : "false",
       rfid.state[1] == CORRECT ? "true" : "false"
   );

@@ -16,14 +16,7 @@ void readAnySerialMessage() {
   Serial.print(msg);
   Serial.println("' command");
 
-  if (msg == "solve" || msg == "v") {
-    logic.solved();
-  }
-  else if (msg == "unsolvable" || msg == "n") {
-    Serial.println("toggling unsolvable now...");
-    logic.unsolvable();
-  }
-  else if (msg == "reset" || msg == "reboot" || msg == "r") {
+  if (msg == "reset" || msg == "reboot" || msg == "r") {
     resetFunc();
   } else {
     Serial.print("unknown command: ");
@@ -43,6 +36,5 @@ void setup() {
 
 void loop() {
   readAnySerialMessage();
-
   logic.handle();
 }

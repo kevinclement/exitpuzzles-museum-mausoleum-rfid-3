@@ -9,11 +9,8 @@ public:
 
   void setup();
   void handle();
-  void solved();
-  void unsolvable();
   void status();
 
 private:
-  bool _unsolvable = false;
 };
 

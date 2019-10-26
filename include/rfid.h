@@ -13,14 +13,12 @@ class Rfid {
     Rfid(Logic &logic);
     void setup();
     void handle();
-    bool solved = false;
     RFID_STATE state[NR_OF_READERS] = { UNKNOWN, UNKNOWN };
 
   private:
     Logic &_logic;
     bool compareTags(uint8_t index);
     RFID_STATE checkForTag(uint8_t index, MFRC522 *mfr);
-    void checkForPuzzleSolved();
     String prettyState(uint8_t);
 
     MFRC522 *mfr[NR_OF_READERS];

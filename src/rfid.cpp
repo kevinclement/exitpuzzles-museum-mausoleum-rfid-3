@@ -9,8 +9,8 @@ MFRC522 mfrc522_1(7, 6);
 MFRC522 mfrc522_2(10, 9);
 
 byte tags[][4] = {
-  { 0xA7, 0x86, 0x8A, 0xF2 },
-  { 0xF7, 0x81, 0x8A, 0xF2 }
+  { 0xF7, 0x6F, 0x8C, 0xF2 },
+  { 0x97, 0x6F, 0x8C, 0xF2 }
 };
 
 Rfid::Rfid(Logic &logic)
@@ -47,7 +47,6 @@ void Rfid::handle() {
       Serial.println(prettyState(st));
 
       state[i] = st;
-      checkForPuzzleSolved();
       _logic.status();
     }
   }
@@ -111,13 +110,6 @@ bool Rfid::compareTags(uint8_t index) {
     }
   }
   return true;
-}
-
-void Rfid::checkForPuzzleSolved() {
-  solved = true;
-  for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    solved = solved && state[i] == CORRECT;
-  }
 }
 
 String Rfid::prettyState(uint8_t state) {
