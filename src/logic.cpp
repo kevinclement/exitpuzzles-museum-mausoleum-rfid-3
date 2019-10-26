@@ -46,8 +46,8 @@ void Logic::status() {
 
       "solved:%s,"
       "unsolvable:%s,"
-      "idol_2:%s,"
-      "idol_3:%s"
+      "idol_4:%s,"
+      "idol_5:%s"
 
       "\r\n"
     , GIT_HASH,

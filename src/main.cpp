@@ -35,7 +35,7 @@ void setup() {
   Serial.begin(9600);
   Serial.setTimeout(10);
   Serial.println("READY");
-  Serial.println("RFID Reader for set 3 by kevinc...\n");
+  Serial.println("RFID Reader for rfid 4 and 5 by kevinc...\n");
 
   logic.setup();
   logic.status();
