@@ -3,12 +3,14 @@
 #include "rfid.h"
 #include "version.h"
 
-Logic::Logic() : 
-  rfid(*this)
+Logic::Logic()
+  : serial(),
+    rfid(*this)
 {
 }
 
 void Logic::setup() {
+  serial.setup("");
   rfid.setup();
 }
 

@@ -5,8 +5,8 @@
 
 #define OFFSET 4
 
-MFRC522 mfrc522_1(7, 6);
-MFRC522 mfrc522_2(10, 9);
+MFRC522 mfrc522_1(23, 21);
+MFRC522 mfrc522_2(33, 21);
 
 byte tags [2][2][4] = {
   {
