@@ -1,0 +1,1 @@
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{serial}=="01ABA1F1", SYMLINK+="ttyRFID3"

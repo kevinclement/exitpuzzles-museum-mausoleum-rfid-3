@@ -1,2 +1,2 @@
 #!/bin/sh
-pio device monitor -b 9600 -p /dev/ttyRFID3
+pio device monitor -b 115200 -p /dev/ttyRFID3
