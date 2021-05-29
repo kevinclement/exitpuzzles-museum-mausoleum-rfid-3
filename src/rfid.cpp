@@ -9,7 +9,7 @@
 
 PN532_HSU pn532hsu(Serial1);
 PN532 nfc(pn532hsu);
-MFRC522 mfrc522_1(23, 21);
+MFRC522 mfr(23, 21);
 
 byte tags [2][2][4] = {
   {
@@ -30,12 +30,12 @@ Rfid::Rfid(Logic &logic)
 void Rfid::setup() {
   SPI.begin();
 
-  mfrc522_1.PCD_Init();
+  mfr.PCD_Init();
   nfc.begin();
 
   delay(4);
   Serial.println();
-  mfrc522_1.PCD_DumpVersionToSerial();
+  mfr.PCD_DumpVersionToSerial();
 
   // NFC device
   uint32_t versiondata = nfc.getFirmwareVersion();
@@ -55,9 +55,6 @@ void Rfid::setup() {
   // configure board to read RFID tags
   nfc.SAMConfig();
 
-  // store addresses
-  mfr[0] = &mfrc522_1;
-
   Serial.println("\nReady to Scan...");
 }
 
@@ -66,9 +63,9 @@ void Rfid::handle() {
 
     RFID_STATE st = UNKNOWN;
     if (i == 0) {
-      st = checkForTagMFR(i, mfr[i]);
-    } else {
       st = checkForTagHSU(i, nfc);
+    } else {
+      st = checkForTagMFR(i, mfr);
     }
 
     if (st != state[i]) {
@@ -85,7 +82,7 @@ void Rfid::handle() {
   }
 }
 
-RFID_STATE Rfid::checkForTagMFR(uint8_t index, MFRC522 *mfr) {
+RFID_STATE Rfid::checkForTagMFR(uint8_t index, MFRC522 mfr) {
   RFID_STATE st = state[index];
   tag_present_prev[index] = tag_present[index];
 
@@ -99,23 +96,23 @@ RFID_STATE Rfid::checkForTagMFR(uint8_t index, MFRC522 *mfr) {
   byte bufferSize = sizeof(bufferATQA);
 
   // Reset baud rates
-  mfr->PCD_WriteRegister(mfr->TxModeReg, 0x00);
-  mfr->PCD_WriteRegister(mfr->RxModeReg, 0x00);
+  mfr.PCD_WriteRegister(mfr.TxModeReg, 0x00);
+  mfr.PCD_WriteRegister(mfr.RxModeReg, 0x00);
 
   // Reset ModWidthReg
-  mfr->PCD_WriteRegister(mfr->ModWidthReg, 0x26);
+  mfr.PCD_WriteRegister(mfr.ModWidthReg, 0x26);
 
-  MFRC522::StatusCode result = mfr->PICC_RequestA(bufferATQA, &bufferSize);
+  MFRC522::StatusCode result = mfr.PICC_RequestA(bufferATQA, &bufferSize);
 
-  if(result == mfr->STATUS_OK){
-    if ( ! mfr->PICC_ReadCardSerial()) { //Since a PICC placed get Serial and continue   
+  if(result == mfr.STATUS_OK){
+    if ( ! mfr.PICC_ReadCardSerial()) { //Since a PICC placed get Serial and continue   
       return st;
     }
     error_counter[index] = 0;
     tag_found[index] = true;
 
     for ( uint8_t i = 0; i < 4; i++) {
-       readCards[index][i] = mfr->uid.uidByte[i];
+       readCards[index][i] = mfr.uid.uidByte[i];
     }
   }
 

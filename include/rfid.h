@@ -19,11 +19,10 @@ class Rfid {
   private:
     Logic &_logic;
     bool compareTags(uint8_t index);
-    RFID_STATE checkForTagMFR(uint8_t index, MFRC522 *mfr);
+    RFID_STATE checkForTagMFR(uint8_t index, MFRC522 mfr);
     RFID_STATE checkForTagHSU(uint8_t index, PN532 nfc);
     String prettyState(uint8_t);
 
-    MFRC522 *mfr[NR_OF_READERS];
     bool tag_present_prev[NR_OF_READERS] = { false, false };
     bool tag_present[NR_OF_READERS] = { false, false };
     int error_counter[NR_OF_READERS] = { 0, 0 };
