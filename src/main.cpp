@@ -18,6 +18,8 @@ void readAnySerialMessage() {
 
   if (msg == "reset" || msg == "reboot" || msg == "r") {
     resetFunc();
+  } else if (msg == "status" || msg == "s") {
+    logic.status();
   } else {
     Serial.print("unknown command: ");
     Serial.println(msg);
