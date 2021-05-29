@@ -2,11 +2,14 @@
 #include "rfid.h"
 #include "logic.h"
 #include <SPI.h>
+#include <PN532_HSU.h>
+#include <PN532.h>
 
 #define OFFSET 4
 
+PN532_HSU pn532hsu(Serial1);
+PN532 nfc(pn532hsu);
 MFRC522 mfrc522_1(23, 21);
-MFRC522 mfrc522_2(33, 21);
 
 byte tags [2][2][4] = {
   {
@@ -28,22 +31,46 @@ void Rfid::setup() {
   SPI.begin();
 
   mfrc522_1.PCD_Init();
-  mfrc522_2.PCD_Init();
+  nfc.begin();
 
   delay(4);
+  Serial.println();
   mfrc522_1.PCD_DumpVersionToSerial();
-  mfrc522_2.PCD_DumpVersionToSerial();
+
+  // NFC device
+  uint32_t versiondata = nfc.getFirmwareVersion();
+  if (! versiondata) {
+    Serial.print("Didn't find PN53x board");
+    while (1); // halt
+  }
+  Serial.print("Firmware Version (PN5"); Serial.print((versiondata>>24) & 0xFF, HEX); 
+  Serial.print("): "); Serial.print((versiondata>>16) & 0xFF, DEC); 
+  Serial.print('.'); Serial.println((versiondata>>8) & 0xFF, DEC);
+
+  // Set the max number of retry attempts to read from a card
+  // This prevents us from waiting forever for a card, which is
+  // the default behaviour of the PN532.
+  nfc.setPassiveActivationRetries(0xFF);
+
+  // configure board to read RFID tags
+  nfc.SAMConfig();
 
   // store addresses
   mfr[0] = &mfrc522_1;
-  mfr[1] = &mfrc522_2;
 
   Serial.println("\nReady to Scan...");
 }
 
 void Rfid::handle() {
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    RFID_STATE st = checkForTag(i, mfr[i]);
+
+    RFID_STATE st = UNKNOWN;
+    if (i == 0) {
+      st = checkForTagMFR(i, mfr[i]);
+    } else {
+      st = checkForTagHSU(i, nfc);
+    }
+
     if (st != state[i]) {
       Serial.print("state changed for ");
       Serial.print(i + OFFSET);
@@ -58,7 +85,7 @@ void Rfid::handle() {
   }
 }
 
-RFID_STATE Rfid::checkForTag(uint8_t index, MFRC522 *mfr) {
+RFID_STATE Rfid::checkForTagMFR(uint8_t index, MFRC522 *mfr) {
   RFID_STATE st = state[index];
   tag_present_prev[index] = tag_present[index];
 
@@ -66,7 +93,7 @@ RFID_STATE Rfid::checkForTag(uint8_t index, MFRC522 *mfr) {
   if(error_counter[index] > 2){
     tag_found[index] = false;
   }
-
+  
   // Detect Tag without looking for collisions
   byte bufferATQA[2];
   byte bufferSize = sizeof(bufferATQA);
@@ -107,6 +134,23 @@ RFID_STATE Rfid::checkForTag(uint8_t index, MFRC522 *mfr) {
   }
 
   return st;
+}
+
+RFID_STATE Rfid::checkForTagHSU(uint8_t index, PN532 nfc) {
+  uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
+  uint8_t uidLength;                        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
+  
+  // Wait for an ISO14443A type cards (Mifare, etc.).  When one is found
+  // 'uid' will be populated with the UID, and uidLength will indicate
+  // if the uid is 4 bytes (Mifare Classic) or 7 bytes (Mifare Ultralight)  
+  if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength)) {
+    for ( uint8_t i = 0; i < 4; i++) {
+      readCards[index][i] = uid[i];
+    }
+    return compareTags(index) ? CORRECT : INCORRECT;
+  } else {
+    return MISSING;
+  }
 }
 
 bool Rfid::compareTags(uint8_t index) {
